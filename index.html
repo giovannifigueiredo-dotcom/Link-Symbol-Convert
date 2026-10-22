@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Copiar Imagem por Link</title>
+<style>
+  .copy-btn {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .link-input {
+    padding: 10px;
+    width: 300px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+  <h3>Copiar Imagem</h3>
+  <!-- Campo para colocar o link da imagem -->
+  <input type="text" id="imageLink" class="link-input" placeholder="Cole o link da imagem aqui" value="image_1593e6.png">
+  <br>
+  <button class="copy-btn" onclick="copyImage()">Copiar Imagem</button>
+
+<script>
+async function copyImage() {
+  const imageUrl = document.getElementById("imageLink").value;
+
+  try {
+    // Faz o download da imagem a partir do link
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+
+    // Cria o item para a área de transferência
+    const item = new ClipboardItem({ [blob.type]: blob });
+
+    // Copia a imagem para a área de transferência
+    await navigator.clipboard.write([item]);
+
+    alert("Imagem copiada com sucesso para a área de transferência!");
+  } catch (error) {
+    console.error("Erro ao copiar:", error);
+    alert("Não foi possível copiar a imagem. Verifique se o link está correto ou se o site permite esse acesso (bloqueio de CORS).");
+  }
+}
+</script>
+
+</body>
+</html>
