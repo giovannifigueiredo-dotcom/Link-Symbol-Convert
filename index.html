@@ -153,8 +153,8 @@
 <body>
 
   <div class="container">
-    <h1>Copiador de Links de Imagens</h1>
-    <p>Insira o link direto de uma imagem na caixa abaixo ou envie uma imagem do seu dispositivo para convertê-la em link. Ao clicar no botão, o link (texto ou string Base64) será copiado para a sua área de transferência.</p>
+    <h1>Copiador de Imagens</h1>
+    <p>Insira o link direto de uma imagem na caixa abaixo ou envie uma imagem do seu dispositivo. Ao clicar no botão, a própria imagem (seus pixels visuais) será copiada para a sua área de transferência.</p>
     
     <!-- Novo campo de Upload -->
     <div class="file-upload-wrapper">
@@ -166,11 +166,11 @@
 
     <input type="text" id="imageLink" class="link-input" placeholder="Cole o link da imagem aqui ou gere um acima" value="image_1593e6.png">
     
-    <button class="copy-btn" onclick="copyLink()">Copiar Link</button>
+    <button class="copy-btn" onclick="copyImageToClipboard()">Copiar Imagem</button>
   </div>
 
 <script>
-// Nova lógica para converter imagem local em link Base64
+// Lógica para converter imagem local em link Base64
 document.getElementById('imageUpload').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
@@ -194,21 +194,47 @@ document.getElementById('imageUpload').addEventListener('change', function(e) {
   }
 });
 
-async function copyLink() {
-  const linkText = document.getElementById("imageLink").value;
+// Lógica atualizada 1.5.0: Copiar a IMAGEM REAL via Canvas
+async function copyImageToClipboard() {
+  const imgSource = document.getElementById("imageLink").value;
   const btn = document.querySelector(".copy-btn");
-  const originalText = "Copiar Link";
+  const originalText = "Copiar Imagem";
 
   try {
     // Feedback visual de carregamento
-    btn.innerText = "Copiando...";
+    btn.innerText = "Processando Imagem...";
     btn.style.pointerEvents = "none";
 
-    // Copia apenas o TEXTO (link ou Base64) para a área de transferência
-    await navigator.clipboard.writeText(linkText);
+    // 1. Carregar a imagem em um objeto Image
+    const img = new Image();
+    img.crossOrigin = "anonymous"; // Permite tentar carregar imagens externas contornando CORS se o servidor suportar
+    img.src = imgSource;
+
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = () => reject(new Error("Não foi possível carregar a imagem. Pode ser um link inválido ou bloqueio de CORS."));
+    });
+
+    // 2. Desenhar a imagem em um Canvas Oculto
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+
+    // 3. Converter o Canvas em um Blob (formato de arquivo PNG)
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+
+    if (!blob) {
+      throw new Error("Erro ao gerar os dados visuais da imagem.");
+    }
+
+    // 4. Gravar o Blob na Área de Transferência
+    const item = new ClipboardItem({ "image/png": blob });
+    await navigator.clipboard.write([item]);
 
     // Feedback visual de sucesso
-    btn.innerText = "Link Copiado! ✔";
+    btn.innerText = "Imagem Copiada! ✔";
     btn.style.backgroundImage = "linear-gradient(to right, #11998e 0%, #38ef7d 100%)";
     
     setTimeout(() => {
@@ -218,8 +244,8 @@ async function copyLink() {
     }, 3000);
 
   } catch (error) {
-    console.error("Erro ao copiar:", error);
-    alert("Não foi possível copiar o texto.");
+    console.error("Erro ao copiar imagem:", error);
+    alert(error.message); // Alerta de erro
     btn.innerText = originalText;
     btn.style.pointerEvents = "auto";
   }
