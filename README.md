@@ -3,24 +3,31 @@
 
 1. Abra o ficheiro `index.html` no seu navegador web.
 2. Irá deparar-se com uma interface centralizada com fundo animado.
-3. Clique em "📁 Escolher imagem do dispositivo..." para fazer upload de uma imagem do seu computador. Ela será automaticamente convertida para um link Base64, e o campo de texto será preenchido.
-4. Em alternativa, no campo de texto, cole o link direto da imagem que deseja copiar.
-5. Clique no botão **Copiar Link**. O botão mudará de estado para indicar que a cópia está em processamento.
-6. Em caso de sucesso, o botão ficará verde indicando a conclusão, e o **texto do link (ou string Base64)** estará pronto para ser colado (`Ctrl+V` ou `Cmd+V`) em qualquer lugar.
+3. Clique em "📁 Escolher imagem do dispositivo..." para fazer upload de uma imagem do seu computador. Ela será convertida em Base64 e o campo será preenchido.
+4. Em alternativa, no campo de texto, cole o link direto da imagem que deseja usar.
+5. Clique no botão **Copiar Imagem**. O script criará um canvas oculto, desenhará a imagem e gerará um arquivo de forma invisível.
+6. Em caso de sucesso, receberá um feedback visual, e a **própria imagem visual** (e não o texto!) estará pronta para ser colada (`Ctrl+V` ou `Cmd+V`) em chats, documentos ou editores de imagem.
 
 ## 📋 Histórico de Atualizações (Changelog)
 
 Todas as alterações e melhorias notáveis neste projeto são documentadas nesta secção.
 
-### [1.4.0] - Cópia de Texto e Links
+### [1.5.0] - Renderização com Canvas e Cópia Visual (Pixels)
 **Alterado**
-* A função de cópia foi reescrita para extrair e copiar o texto (URL ou código Base64) diretamente do campo de entrada usando `navigator.clipboard.writeText()`, em vez de baixar o arquivo de imagem.
-* Textos da interface atualizados para refletir a nova ação (ex: "Copiar Link").
+* A funcionalidade principal foi completamente reformulada. Em vez de copiar texto, a aplicação agora carrega o link ou Base64 num objeto `Image()`.
+* Utilização da **Canvas API** para renderizar a imagem e usar `canvas.toBlob()` para gerar um arquivo PNG em memória.
+* Uso de `new ClipboardItem({'image/png': blob})` para copiar os pixels visuais reais para a área de transferência.
+* Implementação de tratamento rigoroso para erros de CORS que podem impedir o carregamento no Canvas, emitindo um alerta amigável.
+* Títulos e descrições visuais no HTML atualizados.
 
-### [1.3.0] - Conversor de Imagens Locais (Base64)
+### [1.4.0] - Cópia de Texto e Links
 <!-- ... existing code ... -->
 ## 🛠️ Tecnologias Utilizadas
 
 * **HTML5:** Semântica e estruturação da nova interface (títulos, descrições, inputs).
-* **CSS3:** Estilização avançada com Flexbox, gradientes lineares, `backdrop-filter` (Glassmorphism), sombras fluídas e animações (`@keyframes`, `transition`, `transform`).
-* **JavaScript (Vanilla):** Lógica Assíncrona (`async/await`), manipulação da Área de Transferência (via `navigator.clipboard.writeText()`), alteração dinâmica de estilos do DOM para feedback visual, e **`FileReader API`** para conversão de ficheiros locais em links Base64.
+* **CSS3:** Estilização avançada com Flexbox, gradientes lineares, `backdrop-filter` (Glassmorphism), sombras fluídas e animações.
+* **JavaScript (Vanilla):** 
+  * Lógica Assíncrona (`async/await` e `Promises`).
+  * **FileReader API** para upload local.
+  * **Canvas API (`<canvas>`)** para manipulação e desenho de imagens ocultas.
+  * **Clipboard API** nativa avançada para converter blobs com `ClipboardItem` e gravar imagens reais no sistema operativo.
