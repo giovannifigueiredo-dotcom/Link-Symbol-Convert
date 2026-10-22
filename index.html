@@ -153,8 +153,8 @@
 <body>
 
   <div class="container">
-    <h1>Copiador de Imagens</h1>
-    <p>Insira o link direto de uma imagem na caixa abaixo ou envie uma imagem do seu dispositivo para convertê-la em link. Ao clicar no botão, a imagem será copiada para a sua área de transferência.</p>
+    <h1>Copiador de Links de Imagens</h1>
+    <p>Insira o link direto de uma imagem na caixa abaixo ou envie uma imagem do seu dispositivo para convertê-la em link. Ao clicar no botão, o link (texto ou string Base64) será copiado para a sua área de transferência.</p>
     
     <!-- Novo campo de Upload -->
     <div class="file-upload-wrapper">
@@ -166,7 +166,7 @@
 
     <input type="text" id="imageLink" class="link-input" placeholder="Cole o link da imagem aqui ou gere um acima" value="image_1593e6.png">
     
-    <button class="copy-btn" onclick="copyImage()">Copiar Imagem</button>
+    <button class="copy-btn" onclick="copyLink()">Copiar Link</button>
   </div>
 
 <script>
@@ -194,31 +194,21 @@ document.getElementById('imageUpload').addEventListener('change', function(e) {
   }
 });
 
-async function copyImage() {
-  const imageUrl = document.getElementById("imageLink").value;
+async function copyLink() {
+  const linkText = document.getElementById("imageLink").value;
   const btn = document.querySelector(".copy-btn");
-  const originalText = btn.innerText;
+  const originalText = "Copiar Link";
 
   try {
     // Feedback visual de carregamento
     btn.innerText = "Copiando...";
     btn.style.pointerEvents = "none";
 
-    // Faz o download da imagem a partir do link
-    const response = await fetch(imageUrl);
-    
-    if (!response.ok) throw new Error("Erro na rede ou CORS.");
-    
-    const blob = await response.blob();
-
-    // Cria o item para a área de transferência
-    const item = new ClipboardItem({ [blob.type]: blob });
-
-    // Copia a imagem para a área de transferência
-    await navigator.clipboard.write([item]);
+    // Copia apenas o TEXTO (link ou Base64) para a área de transferência
+    await navigator.clipboard.writeText(linkText);
 
     // Feedback visual de sucesso
-    btn.innerText = "Copiado com Sucesso! ✔";
+    btn.innerText = "Link Copiado! ✔";
     btn.style.backgroundImage = "linear-gradient(to right, #11998e 0%, #38ef7d 100%)";
     
     setTimeout(() => {
@@ -229,7 +219,7 @@ async function copyImage() {
 
   } catch (error) {
     console.error("Erro ao copiar:", error);
-    alert("Não foi possível copiar a imagem. Verifique se o link está correto ou se o servidor permite o acesso (bloqueio de CORS).");
+    alert("Não foi possível copiar o texto.");
     btn.innerText = originalText;
     btn.style.pointerEvents = "auto";
   }
