@@ -113,20 +113,87 @@
     transform: translateY(1px);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   }
+
+  /* Estilos para o Upload de Arquivo */
+  .file-upload-wrapper {
+    margin-bottom: 10px;
+  }
+  
+  .file-upload-label {
+    display: block;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+  
+  .file-upload-label:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #00d2ff;
+  }
+  
+  input[type="file"] {
+    display: none;
+  }
+  
+  .divider {
+    margin: 15px 0;
+    font-size: 12px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+  }
 </style>
 </head>
 <body>
 
   <div class="container">
     <h1>Copiador de Imagens</h1>
-    <p>Insira o link direto de uma imagem na caixa abaixo. Ao clicar no botão, a imagem será baixada e copiada diretamente para a sua área de transferência.</p>
+    <p>Insira o link direto de uma imagem na caixa abaixo ou envie uma imagem do seu dispositivo para convertê-la em link. Ao clicar no botão, a imagem será copiada para a sua área de transferência.</p>
     
-    <input type="text" id="imageLink" class="link-input" placeholder="Cole o link da imagem aqui" value="image_1593e6.png">
+    <!-- Novo campo de Upload -->
+    <div class="file-upload-wrapper">
+      <label for="imageUpload" class="file-upload-label" id="uploadLabel">📁 Escolher imagem do dispositivo...</label>
+      <input type="file" id="imageUpload" accept="image/*">
+    </div>
+    
+    <div class="divider">ou</div>
+
+    <input type="text" id="imageLink" class="link-input" placeholder="Cole o link da imagem aqui ou gere um acima" value="image_1593e6.png">
     
     <button class="copy-btn" onclick="copyImage()">Copiar Imagem</button>
   </div>
 
 <script>
+// Nova lógica para converter imagem local em link Base64
+document.getElementById('imageUpload').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const label = document.getElementById('uploadLabel');
+    label.innerText = `⏳ Convertendo ${file.name}...`;
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(event) {
+      // O resultado é um Data URL (Base64) que serve como link da imagem
+      const base64String = event.target.result;
+      document.getElementById('imageLink').value = base64String;
+      label.innerText = `✅ ${file.name} (Pronto!)`;
+    };
+    
+    reader.onerror = function() {
+      label.innerText = "❌ Erro ao ler a imagem";
+    };
+    
+    reader.readAsDataURL(file);
+  }
+});
+
 async function copyImage() {
   const imageUrl = document.getElementById("imageLink").value;
   const btn = document.querySelector(".copy-btn");
